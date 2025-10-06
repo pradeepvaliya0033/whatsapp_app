@@ -67,16 +67,17 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="recipients" class="form-label">Recipients *</label>
-                                <textarea class="form-control @error('to') is-invalid @enderror"
-                                          id="recipients" name="to" rows="3"
-                                          placeholder="Enter phone numbers (one per line or comma-separated)&#10;e.g., +1234567890, +0987654321" required>{{ old('to') }}</textarea>
-                                <div class="form-text">
-                                    <small class="text-muted">Format: +1234567890 (include country code)</small>
+                                <label class="form-label">Recipients *</label>
+                                <div class="input-group mb-2">
+                                    <input type="text" id="recipientInput" class="form-control" placeholder="Add +E.164 number e.g., +15551234567">
+                                    <button type="button" class="btn btn-outline-secondary" id="addRecipientBtn"><i class="fas fa-plus"></i></button>
+                                    <button type="button" class="btn btn-outline-primary" id="pickFromContactsBtn"><i class="fas fa-address-book"></i> Contacts</button>
                                 </div>
-                                @error('to')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <div id="selectedRecipients" class="d-flex flex-wrap gap-2"></div>
+                                <input type="hidden" id="recipientsHidden">
+                                <div class="form-text">
+                                    <small class="text-muted">Click Contacts to pick saved contacts or add manual numbers</small>
+                                </div>
                             </div>
 
                             <div class="mb-3">
@@ -176,14 +177,6 @@
 
 @section('scripts')
 <script>
-// Auto-format phone numbers
-document.getElementById('recipients').addEventListener('input', function() {
-    let value = this.value;
-    // Remove all non-digit characters except + and commas
-    value = value.replace(/[^\d+,]/g, '');
-    this.value = value;
-});
-
 document.getElementById('text_recipient').addEventListener('input', function() {
     let value = this.value;
     // Remove all non-digit characters except +
@@ -222,12 +215,100 @@ document.getElementById('templateMessageForm').addEventListener('submit', functi
     const submitBtn = this.querySelector('button[type="submit"]');
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
     submitBtn.disabled = true;
+    // Put selected recipients into hidden inputs
+    const hidden = document.getElementById('recipientsHidden');
+    const chips = Array.from(document.querySelectorAll('#selectedRecipients .chip'));
+    const numbers = chips.map(c => c.dataset.value);
+    hidden.closest('form').querySelectorAll('input[name="to[]"]').forEach(el => el.remove());
+    numbers.forEach(n => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'to[]';
+        input.value = n;
+        hidden.parentNode.appendChild(input);
+    });
 });
 
 document.getElementById('textMessageForm').addEventListener('submit', function() {
     const submitBtn = this.querySelector('button[type="submit"]');
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
     submitBtn.disabled = true;
+});
+
+// Recipient chips logic
+const recipients = new Set();
+const selectedRecipients = document.getElementById('selectedRecipients');
+const recipientInput = document.getElementById('recipientInput');
+const addRecipientBtn = document.getElementById('addRecipientBtn');
+const pickFromContactsBtn = document.getElementById('pickFromContactsBtn');
+
+function isValidNumber(n) {
+    return /^\+\d{10,15}$/.test(n);
+}
+
+function addRecipient(n) {
+    if (!isValidNumber(n) || recipients.has(n)) return;
+    recipients.add(n);
+    const chip = document.createElement('span');
+    chip.className = 'badge rounded-pill bg-secondary me-2 mb-2 chip';
+    chip.dataset.value = n;
+    chip.innerHTML = `${n} <a href="#" class="text-white ms-2 remove">&times;</a>`;
+    chip.querySelector('.remove').addEventListener('click', (e) => {
+        e.preventDefault();
+        recipients.delete(n);
+        chip.remove();
+    });
+    selectedRecipients.appendChild(chip);
+}
+
+addRecipientBtn.addEventListener('click', () => {
+    const n = recipientInput.value.trim();
+    if (isValidNumber(n)) {
+        addRecipient(n);
+        recipientInput.value = '';
+    }
+});
+
+async function fetchContacts() {
+    const res = await fetch('/api/whatsapp/contacts');
+    const data = await res.json();
+    return data.data || [];
+}
+
+pickFromContactsBtn.addEventListener('click', async () => {
+    const contacts = await fetchContacts();
+    const list = contacts.map(c => `<li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>${c.name} <small class="text-muted">${c.phone}</small></span>
+        <button type="button" class="btn btn-sm btn-outline-primary" data-phone="${c.phone}"><i class="fas fa-plus"></i></button>
+    </li>`).join('');
+
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Pick Contacts</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <ul class="list-group">${list}</ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>`;
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    modal.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-phone]');
+        if (btn) {
+            addRecipient(btn.dataset.phone);
+        }
+    });
+    modal.addEventListener('hidden.bs.modal', () => modal.remove());
+    bsModal.show();
 });
 </script>
 @endsection

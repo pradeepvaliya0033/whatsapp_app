@@ -214,6 +214,12 @@
                                 Templates
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('contacts.*') ? 'active' : '' }}" href="{{ route('contacts.index') }}">
+                                <i class="fas fa-address-book"></i>
+                                Contacts
+                            </a>
+                        </li>
                         <li class="nav-item mt-4">
                             <a class="nav-link" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                 <i class="fas fa-sign-out-alt"></i>

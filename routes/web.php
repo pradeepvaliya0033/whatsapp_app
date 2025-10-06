@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\FacebookController;
+use App\Http\Controllers\ContactsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -86,5 +87,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [WhatsAppController::class, 'createTemplate'])->name('store');
         Route::get('/{templateId}', [WhatsAppController::class, 'getTemplate'])->name('show');
         Route::delete('/{templateId}', [WhatsAppController::class, 'deleteTemplate'])->name('destroy');
+    });
+
+    // Contacts Management
+    Route::prefix('contacts')->name('contacts.')->group(function () {
+        Route::get('/', [ContactsController::class, 'index'])->name('index');
+        Route::get('/create', [ContactsController::class, 'create'])->name('create');
+        Route::post('/', [ContactsController::class, 'store'])->name('store');
+        Route::get('/{uuid}/edit', [ContactsController::class, 'edit'])->name('edit');
+        Route::put('/{uuid}', [ContactsController::class, 'update'])->name('update');
+        Route::delete('/{uuid}', [ContactsController::class, 'destroy'])->name('destroy');
     });
 });

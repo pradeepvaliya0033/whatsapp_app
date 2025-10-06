@@ -15,7 +15,7 @@ return [
     'app_id' => env('FACEBOOK_APP_ID'),
     'app_secret' => env('FACEBOOK_APP_SECRET'),
     'redirect_uri' => env('FACEBOOK_REDIRECT_URI', env('APP_URL') . '/facebook/callback'),
-    'api_version' => env('FACEBOOK_API_VERSION', 'v18.0'),
+    'api_version' => env('FACEBOOK_API_VERSION', 'v21.0'),
 
     /*
     |--------------------------------------------------------------------------

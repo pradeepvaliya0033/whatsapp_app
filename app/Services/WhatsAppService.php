@@ -12,6 +12,8 @@ class WhatsAppService
     private $accessToken;
     private $businessAccountId;
     private $appSecret;
+    private $verifySsl;
+    private $caBundle;
 
     public function __construct()
     {
@@ -20,6 +22,8 @@ class WhatsAppService
         $this->accessToken = config('whatsapp.access_token');
         $this->businessAccountId = config('whatsapp.business_account_id');
         $this->appSecret = config('whatsapp.app_secret');
+        $this->verifySsl = (bool) config('whatsapp.verify_ssl', true);
+        $this->caBundle = config('whatsapp.ca_bundle');
     }
 
     /**
@@ -72,9 +76,13 @@ class WhatsAppService
                 ];
             }
 
-            $response = Http::withToken($this->accessToken)
-                ->timeout(30)
-                ->post($endpoint, $payload);
+            $client = Http::withToken($this->accessToken)->timeout(30);
+            if (!$this->verifySsl) {
+                $client = $client->withoutVerifying();
+            } elseif ($this->caBundle) {
+                $client = $client->withOptions(['verify' => $this->caBundle]);
+            }
+            $response = $client->post($endpoint, $payload);
 
             $responseData = $response->json();
 
@@ -133,9 +141,13 @@ class WhatsAppService
                 'appsecret_proof' => $appSecretProof,
             ];
 
-            $response = Http::withToken($this->accessToken)
-                ->timeout(30)
-                ->post($endpoint, $payload);
+            $client = Http::withToken($this->accessToken)->timeout(30);
+            if (!$this->verifySsl) {
+                $client = $client->withoutVerifying();
+            } elseif ($this->caBundle) {
+                $client = $client->withOptions(['verify' => $this->caBundle]);
+            }
+            $response = $client->post($endpoint, $payload);
 
             return $response->json();
 
@@ -170,9 +182,13 @@ class WhatsAppService
             $appSecretProof = $this->generateAppSecretProof();
             $endpoint = "{$this->apiUrl}/{$this->businessAccountId}/message_templates";
 
-            $response = Http::withToken($this->accessToken)
-                ->timeout(30)
-                ->post($endpoint, $templateData + ['appsecret_proof' => $appSecretProof]);
+            $client = Http::withToken($this->accessToken)->timeout(30);
+            if (!$this->verifySsl) {
+                $client = $client->withoutVerifying();
+            } elseif ($this->caBundle) {
+                $client = $client->withOptions(['verify' => $this->caBundle]);
+            }
+            $response = $client->post($endpoint, $templateData + ['appsecret_proof' => $appSecretProof]);
 
             $responseData = $response->json();
 
@@ -215,9 +231,13 @@ class WhatsAppService
             $appSecretProof = $this->generateAppSecretProof();
             $endpoint = "{$this->apiUrl}/{$this->businessAccountId}/message_templates";
 
-            $response = Http::withToken($this->accessToken)
-                ->timeout(30)
-                ->get($endpoint, ['appsecret_proof' => $appSecretProof]);
+            $client = Http::withToken($this->accessToken)->timeout(30);
+            if (!$this->verifySsl) {
+                $client = $client->withoutVerifying();
+            } elseif ($this->caBundle) {
+                $client = $client->withOptions(['verify' => $this->caBundle]);
+            }
+            $response = $client->get($endpoint, ['appsecret_proof' => $appSecretProof]);
 
             $responseData = $response->json();
 
@@ -260,9 +280,13 @@ class WhatsAppService
             $appSecretProof = $this->generateAppSecretProof();
             $endpoint = "{$this->apiUrl}/{$this->businessAccountId}/message_templates/{$templateId}";
 
-            $response = Http::withToken($this->accessToken)
-                ->timeout(30)
-                ->get($endpoint, ['appsecret_proof' => $appSecretProof]);
+            $client = Http::withToken($this->accessToken)->timeout(30);
+            if (!$this->verifySsl) {
+                $client = $client->withoutVerifying();
+            } elseif ($this->caBundle) {
+                $client = $client->withOptions(['verify' => $this->caBundle]);
+            }
+            $response = $client->get($endpoint, ['appsecret_proof' => $appSecretProof]);
 
             return $response->json();
 
@@ -298,9 +322,13 @@ class WhatsAppService
             $appSecretProof = $this->generateAppSecretProof();
             $endpoint = "{$this->apiUrl}/{$this->businessAccountId}/message_templates/{$templateId}";
 
-            $response = Http::withToken($this->accessToken)
-                ->timeout(30)
-                ->delete($endpoint, ['appsecret_proof' => $appSecretProof]);
+            $client = Http::withToken($this->accessToken)->timeout(30);
+            if (!$this->verifySsl) {
+                $client = $client->withoutVerifying();
+            } elseif ($this->caBundle) {
+                $client = $client->withOptions(['verify' => $this->caBundle]);
+            }
+            $response = $client->delete($endpoint, ['appsecret_proof' => $appSecretProof]);
 
             return $response->json();
 
@@ -332,9 +360,13 @@ class WhatsAppService
             $appSecretProof = $this->generateAppSecretProof();
             $endpoint = "{$this->apiUrl}/{$this->phoneNumberId}/messages/{$messageId}";
 
-            $response = Http::withToken($this->accessToken)
-                ->timeout(30)
-                ->get($endpoint, ['appsecret_proof' => $appSecretProof]);
+            $client = Http::withToken($this->accessToken)->timeout(30);
+            if (!$this->verifySsl) {
+                $client = $client->withoutVerifying();
+            } elseif ($this->caBundle) {
+                $client = $client->withOptions(['verify' => $this->caBundle]);
+            }
+            $response = $client->get($endpoint, ['appsecret_proof' => $appSecretProof]);
 
             return $response->json();
 

@@ -18,7 +18,7 @@ class FacebookService
         $this->appId = config('facebook.app_id');
         $this->appSecret = config('facebook.app_secret');
         $this->redirectUri = config('facebook.redirect_uri');
-        $this->apiVersion = config('facebook.api_version', 'v18.0');
+        $this->apiVersion = config('facebook.api_version', 'v21.0');
     }
 
     /**
@@ -268,7 +268,7 @@ class FacebookService
     {
         // First validate the token
         $validation = $this->validateToken($accessToken);
-        
+
         if ($validation['valid']) {
             return [
                 'success' => true,

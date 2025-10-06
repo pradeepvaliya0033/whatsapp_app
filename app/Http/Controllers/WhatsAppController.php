@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Contact;
 
 class WhatsAppController extends Controller
 {
@@ -24,6 +26,20 @@ class WhatsAppController extends Controller
      */
     public function sendMessage(Request $request)
     {
+        // Normalize inputs: allow 'to' and 'parameters' as comma/newline separated strings or arrays
+        $rawTo = $request->input('to');
+        if (is_string($rawTo)) {
+            $parts = preg_split('/[\s,]+|\r?\n/', $rawTo, -1, PREG_SPLIT_NO_EMPTY);
+            $normalizedTo = array_values(array_filter(array_map('trim', $parts)));
+            $request->merge(['to' => $normalizedTo]);
+        }
+        $rawParams = $request->input('parameters');
+        if (is_string($rawParams)) {
+            $paramParts = preg_split('/[\s,]+|\r?\n/', $rawParams, -1, PREG_SPLIT_NO_EMPTY);
+            $normalizedParams = array_values(array_filter(array_map('trim', $paramParts)));
+            $request->merge(['parameters' => $normalizedParams]);
+        }
+
         $validator = Validator::make($request->all(), [
             'to' => 'required|array',
             'to.*' => 'regex:/^\+\d{10,15}$/',
@@ -98,6 +114,21 @@ class WhatsAppController extends Controller
 
             return response()->json(['error' => $exception->getMessage()], 400);
         }
+    }
+
+    /**
+     * Helper to fetch current user's contacts for UI pickers.
+     */
+    public function getContacts()
+    {
+        $contacts = Contact::where('user_id', Auth::id())
+            ->orderBy('name')
+            ->get(['uuid', 'name', 'phone', 'tags']);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $contacts
+        ]);
     }
 
     /**

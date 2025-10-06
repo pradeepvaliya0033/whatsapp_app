@@ -3,8 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WhatsAppController;
-use App\Http\Controllers\EntityController;
-use App\Http\Controllers\ProviderController;
+// Removed Entity/Provider controllers and routes as part of cleanup
 
 /*
 |--------------------------------------------------------------------------
@@ -21,25 +20,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Entity Management Routes
-Route::prefix('entities')->group(function () {
-    Route::get('/', [EntityController::class, 'index']);
-    Route::post('/', [EntityController::class, 'store']);
-    Route::get('/{uuid}', [EntityController::class, 'show']);
-    Route::put('/{uuid}', [EntityController::class, 'update']);
-    Route::delete('/{uuid}', [EntityController::class, 'destroy']);
-    Route::post('/{uuid}/providers', [EntityController::class, 'addProvider']);
-});
-
-// Provider Management Routes
-Route::prefix('providers')->group(function () {
-    Route::get('/', [ProviderController::class, 'index']);
-    Route::post('/', [ProviderController::class, 'store']);
-    Route::get('/{uuid}', [ProviderController::class, 'show']);
-    Route::put('/{uuid}', [ProviderController::class, 'update']);
-    Route::delete('/{uuid}', [ProviderController::class, 'destroy']);
-    Route::post('/{uuid}/test', [ProviderController::class, 'test']);
-});
+// Entity/Provider routes removed
 
 // WhatsApp Business API Routes
 Route::prefix('whatsapp')->group(function () {
@@ -56,4 +37,7 @@ Route::prefix('whatsapp')->group(function () {
     // Message status and history routes
     Route::get('/messages/{messageId}/status', [WhatsAppController::class, 'getMessageStatus']);
     Route::get('/messages', [WhatsAppController::class, 'getMessageRequests']);
+
+    // Contacts for pickers
+    Route::get('/contacts', [WhatsAppController::class, 'getContacts']);
 });

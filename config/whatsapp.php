@@ -10,7 +10,7 @@ return [
     |
     */
 
-    'api_url' => env('WHATSAPP_API_URL', 'https://graph.facebook.com/v18.0'),
+    'api_url' => env('WHATSAPP_API_URL', 'https://graph.facebook.com/v21.0'),
     'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
     'access_token' => env('WHATSAPP_ACCESS_TOKEN'),
     'business_account_id' => env('WHATSAPP_BUSINESS_ACCOUNT_ID'),
@@ -24,6 +24,10 @@ return [
 
     'default_language' => env('WHATSAPP_DEFAULT_LANGUAGE', 'en_US'),
     'timeout' => env('WHATSAPP_TIMEOUT', 30),
+
+    // SSL verification: set to false only for local dev. Prefer setting a CA bundle path.
+    'verify_ssl' => env('WHATSAPP_VERIFY_SSL', true),
+    'ca_bundle' => env('WHATSAPP_CA_BUNDLE', null), // e.g., storage_path('certs/cacert.pem')
 
     /*
     |--------------------------------------------------------------------------

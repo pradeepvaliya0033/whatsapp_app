@@ -36,12 +36,12 @@
                             <h6 class="mb-1">{{ $user->facebook_name }}</h6>
                             <p class="text-muted mb-1">{{ $user->facebook_email }}</p>
                             <small class="text-muted">
-                                Connected: {{ $user->facebook_connected_at->format('M d, Y H:i') }}
+                                Connected: {{ optional($user->facebook_connected_at)->format('M d, Y H:i') ?? '—' }}
                             </small>
                             @if($user->facebook_token_expires_at)
                                 <br>
                                 <small class="text-muted">
-                                    Token expires: {{ $user->facebook_token_expires_at->format('M d, Y H:i') }}
+                                    Token expires: {{ optional($user->facebook_token_expires_at)->format('M d, Y H:i') ?? '—' }}
                                 </small>
                             @endif
                         </div>
